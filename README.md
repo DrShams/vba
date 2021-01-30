@@ -1,5 +1,5 @@
 # How to use conditions,formulas and VBA macros in Excel 2016
-## 1 Using conditions
+## I Using conditions
 We have 2 files: 
 - [x] 1st of them the customers report which represent the book with reports for each day which
 - [x] 2nd file represent parameters of mud
@@ -10,5 +10,5 @@ In the dialogue message pick
 - [x] **Format only cells that contain**
 - [x] **Format only cells with -> Cell Value -> equal to -> =0**
 ![Screen #1](https://github.com/DrShams/vba/blob/main/Step1_paint_empty_cells.png)
-## 1 Using fomulas
+## II Using fomulas
 ![Screen #2](https://github.com/DrShams/vba/blob/main/Step2_sync%20formulas.png)
