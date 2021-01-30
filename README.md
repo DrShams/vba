@@ -6,8 +6,8 @@ We have 2 files:
 1) Let us **open** the first **.xls file**
 2) **Select** the range which will be under our conditions. In our case it will be the **Range M60:Y150**
 3) **Home -> Conditional Formatting -> New rule**
-In the screenshot <font color='red'>[2]</font>
+{: .blue .bold}
 In the dialogue message pick 
-- [ ] **Format only cells that contain**
-- [ ] **Format only cells with -> Cell Value -> equal to -> =0**
+- [x] **Format only cells that contain**
+- [x] **Format only cells with -> Cell Value -> equal to -> =0**
 ![Screen #1](https://github.com/DrShams/vba/blob/main/Step1_paint_empty_cells.png)
