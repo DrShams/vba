@@ -11,4 +11,4 @@ In the dialogue message pick
 - [x] **Format only cells with -> Cell Value -> equal to -> =0**
 ![Screen #1](https://github.com/DrShams/vba/blob/main/Step1_paint_empty_cells.png)
 ## 1 Using fomulas
-![Screen #2](https://github.com/DrShams/vba/blob/main/Step2_sync formulas.png)
+![Screen #2](https://github.com/DrShams/vba/blob/main/Step2_sync%20formulas.png)
