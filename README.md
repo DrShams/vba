@@ -4,7 +4,7 @@ We have 2 files:
 - [x] 1st of them the customers report which represent the book with reports for each day which
 - [x] 2nd file represent parameters of mud
 1) Let us **open** the first **.xls file**
-2) **Select** the range which will be under our conditions. In our case it will be the **Range M60:Y150**
+2) **Select** the range which will be under our conditions. In our case it will be the **Range M66:Y150**
 3) **Home -> Conditional Formatting -> New rule**
 In the dialogue message pick 
 - [x] **Format only cells that contain**
