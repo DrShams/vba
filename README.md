@@ -1,12 +1,12 @@
 # How to use conditions,formulas and VBA macros in Excel 2016
 ## I Using conditions
-We have 2 files: 
+We have 2 files:
 - [x] 1st of them the customers report which represent the book with reports for each day which
 - [x] 2nd file represent parameters of mud
 1) Let us **open** the first **.xls file**
 2) **Select** the range which will be under our conditions. In our case it will be the **Range M66:Y150**
 3) **Home -> Conditional Formatting -> New rule**
-In the dialogue message pick 
+In the dialogue message pick
 - [x] **Format only cells that contain**
 - [x] **Format only cells with -> Cell Value -> equal to -> =0**
 ![Screen #1](https://github.com/DrShams/vba/blob/main/Step1_paint_empty_cells.png)
@@ -48,6 +48,7 @@ In the dialogue message pick
 4) Add Regular Expression Library: [Tools -> References -> Microsoft VBScript Regular Expressions 5.5 -> ok]
 - This must be done, without this action the macro will not work
 5) Before running the macro:
++ Make sure that Region and Region format is changed to United States (with other formats this script may won't work)
 + In case of creating a new day of the report, be sure to go to the tab on the last day from which the values ​​and formulas will be copied
 + If you need to check the parameters of a particular day, go to the corresponding tab
 6) Run the macro (keyboard shortcut Alt + F8) -> [Run]

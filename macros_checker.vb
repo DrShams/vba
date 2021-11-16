@@ -1,4 +1,8 @@
 'At first add the library -> Tools -> References -> Microsoft VBScript Regular Expressions 5.5 -> ok
+Public Const range_plan = "AC63:AC150" 'Change for the range with plan mud parameters
+Public Const range_fact = "M63:Y150" 'Change for the range with fact mud parameters
+'Make Sure if there is correct Data format(day/month) of time in Windows 10 it should be United States format
+
 Function RegExGet(aString As String, myexp As String) As Variant
 Dim RegEx As New VBScript_RegExp_55.RegExp
 Dim newArray() As String
@@ -17,25 +21,7 @@ cnt = 0
     Next
      RegExGet = newArray()
 End Function
-Function RegExPos(aString As String, myexp As String) As Variant
-'View->Object->RegEx->look for Member of what?
-Dim RegEx As New VBScript_RegExp_55.RegExp
-Dim newArray() As Integer
-Dim x As Integer
-Dim cnt As Integer
-RegEx.Pattern = myexp
-RegEx.IgnoreCase = True
-RegEx.Global = True
-Set Matches = RegEx.Execute(aString)
-x = Matches.Count
-ReDim newArray(x - 1) As Integer
-cnt = 0
-    For Each Match In Matches
-        newArray(cnt) = Match.FirstIndex + 1
-        cnt = cnt + 1
-    Next
-    RegExPos = newArray()
- End Function
+
 Function WorksheetExists(shtName As String, Optional wb As Workbook) As Boolean
 Dim sht As Worksheet
 
@@ -50,11 +36,7 @@ End Function
 'Public wrong_params As Integer
 
 Private Sub mud_checker()
-    Dim arr() As Variant
-    Dim range_plan As String
-    Dim range_fact As String
-    range_plan = "AC63:AC150" 'read all the data which will be divided in min and max
-    range_fact = "M63:Y150" 'read all the data which will be compared with range_plan
+    Dim arr() As Double
     Set ws = Sheets(ActiveSheet.Name)
     ws.Select
 'Take all plan parameters
@@ -72,6 +54,7 @@ Private Sub mud_checker()
     Dim y_row As Integer, x_column As Integer
     y_row = CInt(RegExGet(range_fact, "\d+")(0))
     x_column = CInt(Asc(RegExGet(range_fact, "\w")(0)) - 64) '64 because A in Asc code = 65, B = 66, C = 67 etc...
+	Dim celvalue As Double
     'Make visible only this area
     ActiveWindow.ScrollRow = y_row
     ActiveWindow.ScrollColumn = 1
@@ -79,10 +62,10 @@ Private Sub mud_checker()
     Dim trim_str As String
     Dim LArray() As String
     ReDim arr(1 To rg.Rows.Count, 2) '0 - first parameter, 1 - second parameter
-    For z = 1 To rg.Rows.Count
-        arr(z, 0) = 0 '-min possible value
-        arr(z, 1) = 999999.999 '-max possible value for LSRV 30000.000 ? haven't seen anything more than that...
-    Next z
+    For Z = 1 To rg.Rows.Count
+        arr(Z, 0) = 0.0 '-min possible value
+        arr(Z, 1) = 999999.999 '-max possible value for LSRV 30000.000 ? haven't seen anything more than that...
+    Next Z
     Dim gel_min As Double, gel_max As Double
     Dim gel As Boolean
     gel = False
@@ -90,12 +73,15 @@ Private Sub mud_checker()
     For y = LBound(params) To UBound(params)
         For x = LBound(params, 2) To UBound(params, 2)
             If Not IsEmpty(params(y, x)) And Not params(y, x) = "-" Then 'skip empty cells and cells which contain only '-' sign
-                f1 = 0  'min
-                f2 = 999999.999 'max
+
+                f1 = 0'min
+                f2 = 999999.999'max
                 'clean with replacing empty cells
                 trim_str = WorksheetFunction.Trim(params(y, x))
                 trim_str = Replace(trim_str, " ", "")
-                If InStr(trim_str, "±") Then 'density if ± defines, CDec takes string and converts to Decimal or Float?
+				if Not trim_str Like "*[0-9]*" Then
+					Debug.Print "Not Found Any number in string:", trim_str
+                ElseIf InStr(trim_str, "±") Then 'density if ± defines, CDec takes string and converts to Decimal or Float?
                     f1 = CDec(RegExGet(trim_str, "\d\.\d+")(0)) - CDec(RegExGet(trim_str, "\d\.\d+")(1)) 'min
                     f2 = CDec(RegExGet(trim_str, "\d\.\d+")(0)) + CDec(RegExGet(trim_str, "\d\.\d+")(1)) 'max
                 ElseIf InStr(trim_str, "-") Then
@@ -110,12 +96,8 @@ Private Sub mud_checker()
                         f1 = CDec(LArray(0))
                         f2 = CDec(LArray(1))
                     Else
-                        If Len(RegExGet(trim_str, "\W+")(0)) > 1 Then
-                            Debug.Print "word skip that" 'skip that
-                        Else
-                            f1 = CDec(RegExGet(trim_str, "\d+")(0))
-                            f2 = CDec(RegExGet(trim_str, "\d+")(1))
-                        End If
+						f1 = CDec(RegExGet(trim_str, "\d+")(0))
+						f2 = CDec(RegExGet(trim_str, "\d+")(1))
                     End If
                 ElseIf InStr(trim_str, ChrW(&H2265)) Then 'greater or equal in (u)nicode for instance >=oil percentage
                     f1 = CDec(RegExGet(trim_str, "\d+")(0))
@@ -127,8 +109,8 @@ Private Sub mud_checker()
                     LArray = Split(trim_str, "<")
                     f2 = CDec(LArray(1)) - 0.01
                 End If
-            arr(y, 0) = f1
-            arr(y, 1) = f2
+            arr(y, 0) = CDbl(f1)
+            arr(y, 1) = CDbl(f2)
             'Debug.Print "min = " & arr(y, 0), "max = " & arr(y, 1), y
             End If
         Next x
@@ -140,7 +122,7 @@ Private Sub mud_checker()
     For y = LBound(params) To UBound(params) 'LBound - first position; UBound- last position
         For x = LBound(params, 2) To UBound(params, 2)
         If Not IsEmpty(params(y, x)) Then
-            Set mc = Worksheets(curr_day).Cells(y_row + y, x_column + x)
+            Set mc = Worksheets(curr_day).Cells(y_row + y - 1, x_column + x) 'BUG FIX IT WHY IT IS -1 I DON't KNOW PREVIOUSLY IT WORKS WITHOUT '-1'
             Range(mc.Address()).Select
             With Selection.Interior
                 .Pattern = xlNone
@@ -175,14 +157,21 @@ Private Sub mud_checker()
                         Else
                             'Debug.Print LArray(0), "min = " & arr(y, 0), "max = " & arr(y, 1), "CORRECT GELS"
                         End If
-'All other parameters
-                    ElseIf params(y, x) < arr(y, 0) Or params(y, x) > arr(y, 1) Then
-                        'wrong_params = wrong_params + 1
-                        Selection.Interior.Color = 255 'RED color
-                        Debug.Print "Detected", params(y, x), "min = " & arr(y, 0), "max = " & arr(y, 1)
-                    Else
-                        Debug.Print params(y, x), "min = " & arr(y, 0), "max = " & arr(y, 1)
-                    End If
+					Else
+'All other parameters	
+						if params(y, x) = "-" Then
+							celvalue = 0.0
+						else
+							celvalue = Cdbl(params(y, x))
+						end if
+						If celvalue < arr(y, 0) Or celvalue > arr(y, 1) Then
+							'wrong_params = wrong_params + 1
+							Selection.Interior.Color = 255 'RED color
+							Debug.Print "Detected", celvalue, "min = " & arr(y, 0), "max = " & arr(y, 1)
+						Else
+							Debug.Print celvalue, "min = " & arr(y, 0), "max = " & arr(y, 1)
+						End If
+					End if
                 Else
                     'total_params = total_params + 1
                     'Debug.Print params(y, x), "min = " & arr(y, 0), "max = " & arr(y, 1), "CORRECT PARAMETERS"
@@ -197,7 +186,7 @@ Private Sub new_day()
 'Assign new values and make some calculations
     Dim curr_day As String, next_day As String, prev_day As String
     curr_day = ActiveSheet.Name
-    oldDate_f = Replace(ActiveSheet.Name, ".", "/")
+    oldDate_f = Replace(curr_day, ".", "/")
     prev_day = DateAdd("d", -1, oldDate_f)
     prev_day = Format(prev_day, "dd.mm")
     next_day = DateAdd("d", 1, oldDate_f) 'add 1 day only
@@ -219,8 +208,6 @@ Private Sub new_day()
 'An erray of cells Define which of them equals to 0
     Sheets(curr_day).Select     '2  SELECTION
     Dim rg As Range
-    Dim range_fact As String
-    range_fact = "M63:Y150" 'read all the data copy and paste values to clear cells from formulas
     Set rg = ThisWorkbook.Worksheets(curr_day).Range(range_fact)
 'Paint cells which we going to check
     rg.Select
@@ -266,7 +253,7 @@ Sub mud_reports()
         Call new_day
     Else
     End If
-    Result = MsgBox("Would you like to check all the parameters from all days?", vbYesNoCancel + vbDefaultButton2)
+    Result = MsgBox("Would you like to check all the parameters for all days?", vbYesNoCancel + vbDefaultButton2)
     If Result = vbYes Then
         Dim i As Integer
         For i = 1 To Worksheets.Count
@@ -276,3 +263,5 @@ Sub mud_reports()
     Else
     End If
 End Sub
+
+
